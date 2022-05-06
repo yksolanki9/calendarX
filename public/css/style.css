@@ -1,0 +1,22 @@
+html, body {
+  background-color: black;
+  min-height: 100%;
+}
+
+.container {
+  text-align: center;
+}
+
+.heading {
+  color: #eee;
+  font-size: 72px;
+  margin-top: 200px;
+}
+
+.bi-google {
+  margin-bottom: 4px;
+}
+
+.cta {
+  margin-top: 40px;
+}

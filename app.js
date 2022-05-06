@@ -5,7 +5,8 @@ require('./google-auth');
 
 const app = express();
 
-app.use('view engine', 'ejs');
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'));
 
 app.use(cookieSession({
   name: 'google-auth-session',
@@ -27,7 +28,8 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {
-  res.json({message: "You are not logged in"})
+  res.render('index');
+  // res.json({message: "You are not logged in"})
 });
 
 app.get("/failed", (req, res) => {
