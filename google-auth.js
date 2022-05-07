@@ -1,26 +1,50 @@
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const passport = require('passport');
+const { google } = require('googleapis');
+const axios = require('axios');
 require('dotenv').config();
 
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
-});
+const oauth2Client = new google.auth.OAuth2(
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  'http://localhost:3000/auth/google/callback'
+);
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/auth/google/callback',
-    passReqToCallback: true
-  },
-  function(request, accessToken, refreshToken, profile, cb) {
-    // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-    //   return cb(err, user);
-    // });
-    console.log('ACCESS TOKEN -> ', accessToken);
-    return cb(null, profile);
-  }
-));
+function getGoogleAuthURL() {
+  const scopes = [
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/calendar'
+  ];
+
+  return oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: scopes,
+  });
+}
+
+async function getGoogleUser({ code }) {
+  const { tokens } = await oauth2Client.getToken(code);
+  console.log('TOKENS IS ', tokens);
+
+  // Fetch the user's profile with the access token and bearer
+  const googleUser = await axios
+    .get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.id_token}`,
+        },
+      },
+    )
+    .then(res => {
+      return res.data
+    })
+    .catch(error => {
+      throw new Error(error.message);
+    });
+  return googleUser;
+}
+
+module.exports = { getGoogleAuthURL, getGoogleUser};
