@@ -1,6 +1,8 @@
 const express = require('express');
-const { getGoogleAuthURL, getGoogleUser} = require('./google-auth');
+const { google } = require('googleapis');
+const { oauth2Client, getGoogleAuthURL } = require('./google-auth');
 
+const calendar = google.calendar('v3');
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -28,16 +30,6 @@ app.get("/failed", (req, res) => {
 
 app.get("/success", isLoggedIn, async (req, res) => {
   res.send([req.user,req.headers] );
-  //Get all calender Ids
-  // const calenderListRes = await axios.get('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
-  //   minAccessRole: 'freeBusyReader'
-  // });
-  // console.log('RESPONSE IS -> ', calenderListRes);
-
-  // //Query FREEBUSY with all calender ids and todays date
-  // // await axios.post('https://www.googleapis.com/calendar/v3/freeBusy', {
-  // // })
-  // res.send(calenderListRes);
 });
 
 app.get('/auth/google', (req, res) => {
@@ -45,8 +37,20 @@ app.get('/auth/google', (req, res) => {
 });
 
 app.get('/auth/google/callback', async (req, res) => {
-  const userData = await getGoogleUser(req.query);
-  res.send(userData);
+  const { tokens } = await oauth2Client.getToken(req.query);
+  oauth2Client.setCredentials({
+    refresh_token: tokens.refresh_token
+  });
+
+  const data = await calendar.calendarList.list({
+    auth: oauth2Client,
+    maxResults: 20
+  });
+  res.send(data);
+})
+
+app.get('/calender', (req, res) => {
+
 })
 
 app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 3000'));

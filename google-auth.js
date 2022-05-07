@@ -26,7 +26,9 @@ function getGoogleAuthURL() {
 
 async function getGoogleUser({ code }) {
   const { tokens } = await oauth2Client.getToken(code);
-  console.log('TOKENS IS ', tokens);
+  oauth2Client.setCredentials({
+    refresh_token: tokens.refresh_token
+  });
 
   // Fetch the user's profile with the access token and bearer
   const googleUser = await axios
@@ -44,7 +46,7 @@ async function getGoogleUser({ code }) {
     .catch(error => {
       throw new Error(error.message);
     });
-  return googleUser;
+    return googleUser;
 }
 
-module.exports = { getGoogleAuthURL, getGoogleUser};
+module.exports = { oauth2Client, getGoogleAuthURL, getGoogleUser};
