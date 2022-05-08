@@ -1,0 +1,50 @@
+const moment = require('moment');
+
+function getFreeIntervals(date, busyIntervals) {
+  const allIntervals = getAllIntervals(date);
+  if(busyIntervals.length === 0) return getFormattedIntervals(allIntervals);
+  const freeIntervals = [];
+  let busyIntervalIdx = 0;
+  allIntervals.forEach((currentIntervalStart) => {
+    if (busyIntervalIdx === busyIntervals.length) {
+      return freeIntervals.push(currentIntervalStart);
+    }
+    const currentIntervalEnd = currentIntervalStart.clone().add(30, 'm');
+    const busyInterval = busyIntervals[busyIntervalIdx];
+    if(!currentIntervalStart.isBetween(busyInterval.start, busyInterval.end) && !currentIntervalEnd.isBetween(busyInterval.start, busyInterval.end)) {
+      freeIntervals.push(currentIntervalStart);
+    }
+    if (currentIntervalEnd.isAfter(busyInterval.end)) {
+      busyIntervalIdx++;
+    }
+  })
+  return getFormattedIntervals(freeIntervals);
+}
+
+function getAllIntervals(date) {
+  let intervals = [];
+  let intervalStartTime;
+  const selectedDate = moment(date);
+
+  if (selectedDate.startOf('day').isSame(moment().startOf('day')) && (moment().hour() > 9) && (moment().hour() < 17)) {
+    intervalStartTime = moment().add(15 - moment().minute() % 15, 'm').subtract(moment().seconds(), 's');
+  } else {
+    intervalStartTime = selectedDate.clone().set({'h': 9, 'm': 0, 's': 0});
+  }
+  const intervalEndTime = selectedDate.clone().set({'h': 17, 'm': 0, 's': 0});
+  
+  while(intervalStartTime < intervalEndTime){
+      intervals.push(new moment(intervalStartTime));
+      intervalStartTime.add(15, 'm');
+  }
+
+  return intervals;
+}
+
+function getFormattedIntervals(intervals) {
+  return intervals.map((interval) => interval.format('LT'));
+}
+
+module.exports = { getFreeIntervals, getFormattedIntervals};
+
+

@@ -1,0 +1,28 @@
+<%- include('./partials/header') %>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const myDate = new Date('<%=selectedDate%>') || new Date();
+    const picker = MCDatepicker.create({
+      el: '#datepicker',
+      selectedDate: myDate,
+      disableWeekends: true,
+      dateFormat: 'ddd, dd-mmmm-yy',
+      minDate: new Date(),
+      bodyType: 'inline',
+      theme: {
+        theme_color: '#161518',
+        main_background: '#F5F5F6'
+      }
+    });
+    picker.setFullDate(myDate);
+    picker.onSelect((date, formatedDate) => {
+      var selectedDate = date;
+      window.location.replace(`http://localhost:3000/calendar?selectedDate=${date}`);
+    });
+  })
+</script>
+  <input id="datepicker" type="text">
+  <div style="color: gray"><%= JSON.stringify(data) %></div>
+  <h2>BUSY INTERVALS:</h2>
+  <div style="color: gray"><%= JSON.stringify(busyIntervals) %></div>
+<%- include('./partials/header') %>

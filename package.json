@@ -19,7 +19,6 @@
     "googleapis": "^100.0.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.3",
-    "momentjs": "^2.0.0",
     "mongoose": "^6.3.2",
     "passport": "^0.5.2",
     "passport-google-oauth20": "^2.0.0"
