@@ -42,21 +42,16 @@ function getAllIntervals(date) {
       intervalStartTime = selectedDate.clone().add(1, 'day').set({'h': 9, 'm': 0, 's': 0});
     }
   }
-  // console.log('INTERVAL START TIME IS', intervalStartTime);
+
   const intervalEndTime = selectedDate.clone().set({'h': 17, 'm': 0, 's': 0});
   
   while(intervalStartTime < intervalEndTime){
       intervals.push(new moment(intervalStartTime));
       intervalStartTime.add(15, 'm');
   }
-
   return intervals;
 }
 
-function getFormattedIntervals(intervals) {
-  return intervals.map((interval) => interval.format('LT'));
-}
-
-module.exports = { getFreeIntervals, getFormattedIntervals};
+module.exports = { getFreeIntervals };
 
 

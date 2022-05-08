@@ -12,14 +12,6 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
-const isLoggedIn = (req, res, next) => {
-  if (req.user) {
-      next();
-  } else {
-      res.sendStatus(401);
-  }
-}
-
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
@@ -72,19 +64,6 @@ app.get('/calendar', async (req, res) => {
 app.get('/auth/google/callback', async (req, res) => {
   const googleUser = await getGoogleUser(req.query);
 
-  // GET LIST OF CALENDERS OF A USER
-  // const data = await calendar.calendarList.list({
-  //   auth: oauth2Client
-  // });
-  // res.send(data);
-
-  // GET CALENDER BY ID
-  // const data = await calendar.calendars.get({
-  //   auth: oauth2Client,
-  //   calendarId: googleUser.email
-  // });
-  // res.send({ googleUser, data });
-
   // GET FREEBUSY
   const data = await calendar.freebusy.query({
     auth: oauth2Client,
@@ -128,89 +107,6 @@ app.get('/meeting', async(req, res) => {
   });
   res.send(data);
 });
-
-app.get('/calendar-test', async (req, res) => {
-  const googleOAuth2Client = new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    'http://localhost:3000/auth/google/callback'
-  );
-  googleOAuth2Client.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-  });
-
-  //TODO: Get this form DB
-  const calendarId = 'yashsolanki1709@gmail.com';
-
-  //GETTING THE BUSY SLOTS FOR THE USER
-  const data = await calendar.freebusy.query({
-    auth: googleOAuth2Client,
-    requestBody: {
-      timeMin: moment().utcOffset("+05:30").startOf('day').format(),
-      timeMax: moment().utcOffset("+05:30").endOf('day').format(),
-      items: [{
-        id: calendarId
-      }],
-      timeZone: 'IST'
-    }
-  });
-  // console.log(data);
-  res.send(data.calendars.calendarId);
-
-  //Getting all the available slots for the day -> 9 to 5 PST
-
-  //CREATING A NEW EVENT
-  // const data = await calendar.events.insert({
-  //   auth: googleOAuth2Client,
-  //   calendarId: 'yashsolanki1709@gmail.com',
-  //   requestBody: {
-  //     start: {
-  //       dateTime: '2022-05-05T14:48:00.000Z'
-  //     },
-  //     end: {
-  //       dateTime: '2022-05-05T16:48:00.000Z'
-  //     }
-  //   }
-  // });
-  // res.send(data);
-})
-
-// function getFreeIntervals(allIntervals, busyIntervals) {
-//   const freeIntervals = [];
-//   let busyIntervalIdx = 0;
-//   allIntervals.forEach((currentIntervalStart) => {
-//     const currentIntervalEnd = currentIntervalStart().clone().add({'m': 29, 's': '59'});
-//     const busyInterval = busyIntervals[busyIntervalIdx];
-//     if(currentIntervalStart.isBetween(busyInterval.start, busyInterval.end) || currentIntervalEnd.isBetween(busyInterval.start, busyInterval.end)) {
-//       freeIntervals.push(currentIntervalStart);
-//     }
-//     if (currentIntervalEnd >= busyInterval.end) {
-//       busyIntervalIdx++;
-//     }
-//   })
-//   return freeIntervals;
-// }
-
-// function getAllIntervals(date) {
-//   let intervals = [];
-//   let intervalStartTime;
-//   const selectedDate = moment(date);
-
-//   if (selectedDate.startOf('day').isSame(moment().startOf('day')) && (moment().hour() > 9) && (moment().hour() < 17)) {
-//     intervalStartTime = moment().add(15 - moment().minute() % 15, 'm').subtract(moment().seconds(), 's');
-//   } else {
-//     intervalStartTime = selectedDate.clone().set({'h': 9, 'm': 0, 's': 0});
-//   }
-//   const intervalEndTime = selectedDate.clone().set({'h': 17, 'm': 0, 's': 0});
-  
-//   while(intervalStartTime < intervalEndTime){
-//       intervals.push(new moment(intervalStartTime).format('LT'));
-//       intervalStartTime.add(15, 'm');
-//   }
-
-//   return intervals;
-// }
-//https://onecompiler.com/nodejs/3y3esnnr5
 
 app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 3000'));
 
