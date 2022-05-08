@@ -17,12 +17,31 @@
     picker.setFullDate(myDate);
     picker.onSelect((date, formatedDate) => {
       var selectedDate = date;
-      window.location.replace(`http://localhost:3000/calendar?selectedDate=${date}`);
+      window.location.replace(`/calendar?selectedDate=${encodeURI(date)}`);
     });
   })
 </script>
-  <input id="datepicker" type="text">
-  <div style="color: gray"><%= JSON.stringify(data) %></div>
+  <div class="calender-block">
+    <h2>Schedule a Meeting</h2>
+    <div class="datepicker-container">
+      <input placeholder="Select a Date" id="datepicker" type="text">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-calendar" viewBox="0 0 16 16">
+        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+      </svg>
+    </div>
+  </div>
+  <!-- <div style="color: gray"><%= JSON.stringify(freeIntervals) %></div>
   <h2>BUSY INTERVALS:</h2>
-  <div style="color: gray"><%= JSON.stringify(busyIntervals) %></div>
+  <div style="color: gray"><%= JSON.stringify(busyIntervals) %></div> -->
+  
+  <!-- <button type="submit" class="btn btn-outline-light cta"> Time </button> -->
+  <div class="container">
+    <div class="row justify-content-center">
+      <% freeIntervals.forEach((interval) => { %>
+        <div class="col-lg-2 col-md-3">
+          <button onclick="window.location.replace(`/meeting?selectedInterval='<%= encodeURI(interval.interval) %>'`)" type="submit" class="btn btn-outline-light cta cta-time"> <%= interval.formatedInterval %> </button>
+        </div>
+      <% }) %>
+    </div>
+  </div>
 <%- include('./partials/header') %>

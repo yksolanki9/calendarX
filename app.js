@@ -42,12 +42,15 @@ app.get('/calendar', async (req, res) => {
     refresh_token: process.env.REFRESH_TOKEN
   });
 
-  let selectedDate = req.query.selectedDate;
-
   //TODO: GET THIS FROM DB AS WELL
   const calendarId = 'yashsolanki1709@gmail.com';
 
-  selectedDate = selectedDate ? new Date(selectedDate) : new Date();
+  let selectedDate = req.query.selectedDate;
+  if (!selectedDate || selectedDate === 'null') {
+    selectedDate = new Date();
+  } else {
+    selectedDate = new Date(selectedDate);
+  }
 
   const data = await calendar.freebusy.query({
     auth: googleOAuth2Client,
@@ -63,7 +66,6 @@ app.get('/calendar', async (req, res) => {
 
   const busyIntervals = data.data.calendars[calendarId].busy;
   const freeIntervals = getFreeIntervals(selectedDate, busyIntervals);
-
   res.render('calendar', {freeIntervals: freeIntervals, busyIntervals: busyIntervals, selectedDate: selectedDate});
 })
 
@@ -92,12 +94,40 @@ app.get('/auth/google/callback', async (req, res) => {
       items: [{
         id: googleUser.email
       }],
-      timeZone: 'PST'
+      timeZone: 'IST'
     }
   });
 
   res.send(data);
 })
+
+app.get('/meeting', async(req, res) => {
+  const googleOAuth2Client = new google.auth.OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    'http://localhost:3000/auth/google/callback'
+  );
+  googleOAuth2Client.setCredentials({
+    refresh_token: process.env.REFRESH_TOKEN
+  });
+
+  const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('+0530'));
+  const endTime = moment(startTime).clone().add(30, 'm');
+
+  const data = await calendar.events.insert({
+    auth: googleOAuth2Client,
+    calendarId: 'yashsolanki1709@gmail.com',
+    requestBody: {
+      start: {
+        dateTime: startTime
+      },
+      end: {
+        dateTime: endTime
+      }
+    }
+  });
+  res.send(data);
+});
 
 app.get('/calendar-test', async (req, res) => {
   const googleOAuth2Client = new google.auth.OAuth2(
@@ -116,15 +146,15 @@ app.get('/calendar-test', async (req, res) => {
   const data = await calendar.freebusy.query({
     auth: googleOAuth2Client,
     requestBody: {
-      timeMin: moment().startOf('day').format(),
-      timeMax: moment().endOf('day').format(),
+      timeMin: moment().utcOffset("+05:30").startOf('day').format(),
+      timeMax: moment().utcOffset("+05:30").endOf('day').format(),
       items: [{
         id: calendarId
       }],
-      timeZone: 'PST'
+      timeZone: 'IST'
     }
   });
-  console.log(data);
+  // console.log(data);
   res.send(data.calendars.calendarId);
 
   //Getting all the available slots for the day -> 9 to 5 PST

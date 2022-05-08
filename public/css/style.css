@@ -1,6 +1,7 @@
 html, body {
   background-color: black;
   min-height: 100%;
+  color: #eee;
 }
 
 .container {
@@ -8,7 +9,6 @@ html, body {
 }
 
 .heading {
-  color: #eee;
   font-size: 72px;
   margin-top: 200px;
 }
@@ -20,3 +20,33 @@ html, body {
 .cta {
   margin-top: 40px;
 }
+
+.cta-time {
+  padding: 8px 24px;
+}
+
+.calender-block {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.datepicker-container {
+  display: inline-block;
+  margin-top: 24px;
+  background: #eee;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+#datepicker {
+  background: transparent;
+  border: 0;
+}
+
+.bi-calendar {
+  height: 18px;
+  width: 18px;
+  margin-bottom: 4px;
+}
+
+
