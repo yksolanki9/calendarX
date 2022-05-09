@@ -8,7 +8,6 @@ const User = require('./models/user.model');
 require('dotenv').config();
 require('./config/mongoose');
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 const calendar = google.calendar('v3');
 const app = express();
 
@@ -28,35 +27,38 @@ app.get('/auth/google', (req, res) => {
 });
 
 app.get('/calendar/:userId', async (req, res) => {
-
   // TEST URL -> http://localhost:3000/calendar/627889aa98d7575751ad794d
 
-  const user = await User.findById(req.params.userId);
-
-  const calendarId = user.email;
-
-  let selectedDate = req.query.selectedDate;
-  if (!selectedDate || selectedDate === 'null') {
-    selectedDate = new Date();
-  } else {
-    selectedDate = new Date(selectedDate);
-  }
-
-  const data = await calendar.freebusy.query({
-    auth: getOAuth2Client(user.refresh_token),
-    requestBody: {
-      timeMin: moment(selectedDate).startOf('day').format(),
-      timeMax: moment(selectedDate).endOf('day').format(),
-      items: [{
-        id: calendarId
-      }],
-      timeZone: 'IST'
+  try {
+    const user = await User.findById(req.params.userId);
+  
+    const calendarId = user.email;
+  
+    let selectedDate = req.query.selectedDate;
+    if (!selectedDate || selectedDate === 'null') {
+      selectedDate = new Date();
+    } else {
+      selectedDate = new Date(selectedDate);
     }
-  });
-
-  const busyIntervals = data.data.calendars[calendarId].busy;
-  const freeIntervals = getFreeIntervals(selectedDate, busyIntervals);
-  res.render('calendar', {freeIntervals: freeIntervals, busyIntervals: busyIntervals, selectedDate: selectedDate});
+  
+    const data = await calendar.freebusy.query({
+      auth: getOAuth2Client(user.refresh_token),
+      requestBody: {
+        timeMin: moment(selectedDate).startOf('day').format(),
+        timeMax: moment(selectedDate).endOf('day').format(),
+        items: [{
+          id: calendarId
+        }],
+        timeZone: 'IST'
+      }
+    });
+  
+    const busyIntervals = data.data.calendars[calendarId].busy;
+    const freeIntervals = getFreeIntervals(selectedDate, busyIntervals);
+    res.render('calendar', {freeIntervals: freeIntervals, busyIntervals: busyIntervals, selectedDate: selectedDate});
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
 })
 
 app.get('/auth/google/callback', async (req, res) => {
@@ -81,24 +83,28 @@ app.get('/auth/google/callback', async (req, res) => {
 })
 
 app.get('/meeting/:userId', async(req, res) => {
-  const user = await User.findById(req.params.userId);
-
-  const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('+0530'));
-  const endTime = moment(startTime).clone().add(30, 'm');
-
-  const data = await calendar.events.insert({
-    auth: getOAuth2Client(user.refresh_token),
-    calendarId: user.email,
-    requestBody: {
-      start: {
-        dateTime: startTime
-      },
-      end: {
-        dateTime: endTime
+  try {
+    const user = await User.findById(req.params.userId);
+  
+    const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('+0530'));
+    const endTime = moment(startTime).clone().add(30, 'm');
+  
+    const data = await calendar.events.insert({
+      auth: getOAuth2Client(user.refresh_token),
+      calendarId: user.email,
+      requestBody: {
+        start: {
+          dateTime: startTime
+        },
+        end: {
+          dateTime: endTime
+        }
       }
-    }
-  });
-  res.send(data);
+    });
+    res.send(data);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 3000'));
