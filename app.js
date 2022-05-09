@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const { getOAuth2Client, getGoogleAuthURL, getGoogleUser } = require('./google-auth');
 const { getFreeIntervals } = require('./utils/intervals');
 const User = require('./models/user.model');
+const Meeting = require('./models/meeting.model');
 require('dotenv').config();
 require('./config/mongoose');
 
@@ -75,8 +76,7 @@ app.get('/auth/google/callback', async (req, res) => {
     });
     
     await user.save();
-
-    res.status(200).json({ uniqueUrl: `http://localhost:3000/calendar/${user._id}`});
+    res.render('auth', {url: `http://localhost:3000/calendar/${user._id}`});
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
@@ -98,10 +98,18 @@ app.get('/meeting/:userId', async(req, res) => {
         },
         end: {
           dateTime: endTime
-        }
+        },
+        attendees: [{
+          email: 'mytestemail@gmail.com',
+          displayName: 'Test Customer',
+        }],
+        description: 'Test sales event'
       }
     });
-    res.send(data);
+
+    const meeting = new Meeting(data.data);
+    await meeting.save();
+    res.render('meeting', {organizer: user.name, meetingTime: startTime.toString()});
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
