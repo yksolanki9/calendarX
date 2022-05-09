@@ -49,4 +49,21 @@ html, body {
   margin-bottom: 4px;
 }
 
+.table-custom {
+  --bs-table-bg: #111;
+  color: #ddd;
+  margin-top: 60px;
+}
 
+.table-container {
+  margin: 0 80px;
+}
+
+.user {
+  display: inline;
+  margin-left: 60px;
+}
+
+.heading-2 {
+  margin-bottom: 36px;
+}

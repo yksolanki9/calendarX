@@ -1,0 +1,47 @@
+<%- include('./partials/header') %>
+<div class="calendar-block">
+  <h2 class="heading-2">
+    Show Employee Meetings
+  </h2>
+<div class="btn-group">
+  <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Select an Employee
+  </button>
+  <div class="dropdown-menu dropdown-menu-dark">
+    <% users.forEach((user) => { %>
+      <a class="dropdown-item" href="/admin/meetings?userId=<%=user.id%>"><%= user.name %> - <%= user.email %></a>
+      <div class="dropdown-divider"></div>
+    <% }) %>
+  </div>
+</div>
+<% if(userData) { %>
+  <div class="user">
+  <%= userData.name %> - <%= userData.email %>
+  </div>
+<% } %>
+
+<% if(meetingsData?.length) { %>
+  <div class="table-container">
+    <table class="table table-dark table-custom">
+      <thead>
+        <tr>
+          <th scope="col">Attendee</th>
+          <th scope="col">Start</th>
+          <th scope="col">End</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% meetingsData.forEach((data) => { %>
+        <tr>
+          <th scope="row"><%= data.attendee %></th>
+          <td><%= data.start %></td>
+          <td><%= data.end %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+</div>
+
+<%- include('./partials/footer') %>

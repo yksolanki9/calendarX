@@ -38,7 +38,7 @@ function getAllIntervals(date) {
   if (selectedDate.startOf('day').isSame(moment().utcOffset("+05:30").startOf('day'))) {
     if ((moment().hour() > 9) && (moment().hour() < 17)) {
       intervalStartTime = moment().add(15 - moment().minute() % 15, 'm').subtract(moment().seconds(), 's');
-    } else if (moment().hour() > 17) {
+    } else if (moment().hour() >= 17) {
       intervalStartTime = selectedDate.clone().add(1, 'day').set({'h': 9, 'm': 0, 's': 0});
     }
   }

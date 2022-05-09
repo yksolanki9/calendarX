@@ -28,8 +28,6 @@ app.get('/auth/google', (req, res) => {
 });
 
 app.get('/calendar/:userId', async (req, res) => {
-  // TEST URL -> http://localhost:3000/calendar/627889aa98d7575751ad794d
-
   try {
     const user = await User.findById(req.params.userId);
   
@@ -107,9 +105,50 @@ app.get('/meeting/:userId', async(req, res) => {
       }
     });
 
-    const meeting = new Meeting(data.data);
+    const meetingData = {
+      _id: mongoose.Types.ObjectId(),
+      ...data.data
+    }
+
+    const meeting = new Meeting(meetingData);
     await meeting.save();
+
+    await User.findByIdAndUpdate(req.params.userId, {
+      '$push': { 'meetings': meetingData._id}
+    });
     res.render('meeting', {organizer: user.name, meetingTime: startTime.toString()});
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/admin/meetings', async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    let meetingsData = [];
+    let userData;
+    if (userId) {
+      const populatedUser = await User.findById(userId).populate('meetings').exec();
+
+      userData = {
+        email: populatedUser.email,
+        name: populatedUser.name
+      }
+
+      meetingsData = populatedUser.meetings.map((meeting) => ({
+        start: new Date(meeting.start.dateTime).toLocaleString(),
+        end: new Date(meeting.end.dateTime).toLocaleString(),
+        attendee: meeting.attendees[0].email,
+      }));
+    }
+
+    const users = (await User.find()).map(user => ({
+      name: user.name,
+      email: user.email,
+      id: user._id
+    }));
+
+    return res.render('all-meetings', {users, meetingsData, userData });
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
