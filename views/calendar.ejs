@@ -17,9 +17,16 @@
     picker.setFullDate(myDate);
     picker.onSelect((date, formatedDate) => {
       var selectedDate = date;
-      window.location.replace(`/calendar?selectedDate=${date}`);
+      let url = new URL(window.location.href);
+      url.searchParams.set('selectedDate', date);
+      window.location.replace(url);
     });
-  })
+  });
+  function onClickInterval(interval) {
+    let url = new URL(window.location.href.replace('calendar', 'meeting'));
+    url.searchParams.set('selectedInterval', interval);
+    window.location.replace(url);
+  }
 </script>
   <div class="calender-block">
     <h2>Schedule a Meeting</h2>
@@ -35,7 +42,7 @@
     <div class="row justify-content-center">
       <% freeIntervals.forEach((interval) => { %>
         <div class="col-lg-2 col-md-3">
-          <button onclick="window.location.replace(`/meeting?selectedInterval='<%= interval.interval %>'`)" type="submit" class="btn btn-outline-light cta cta-time"> <%= interval.formatedInterval %> </button>
+          <button onclick="onClickInterval('<%= interval.interval %>')" type="submit" class="btn btn-outline-light cta cta-time"> <%= interval.formatedInterval %> </button>
         </div>
       <% }) %>
     </div>

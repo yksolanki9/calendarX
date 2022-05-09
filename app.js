@@ -1,9 +1,12 @@
 const express = require('express');
 const { google } = require('googleapis');
 const moment = require('moment');
-const { oauth2Client, getGoogleAuthURL, getGoogleUser } = require('./google-auth');
+const mongoose = require('mongoose');
+const { getOAuth2Client, getGoogleAuthURL, getGoogleUser } = require('./google-auth');
 const { getFreeIntervals } = require('./utils/intervals');
+const User = require('./models/user.model');
 require('dotenv').config();
+require('./config/mongoose');
 
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 const calendar = google.calendar('v3');
@@ -24,18 +27,13 @@ app.get('/auth/google', (req, res) => {
   res.redirect(getGoogleAuthURL());
 });
 
-app.get('/calendar', async (req, res) => {
-  const googleOAuth2Client = new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    'http://localhost:3000/auth/google/callback'
-  );
-  googleOAuth2Client.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-  });
+app.get('/calendar/:userId', async (req, res) => {
 
-  //TODO: GET THIS FROM DB AS WELL
-  const calendarId = 'yashsolanki1709@gmail.com';
+  // TEST URL -> http://localhost:3000/calendar/627889aa98d7575751ad794d
+
+  const user = await User.findById(req.params.userId);
+
+  const calendarId = user.email;
 
   let selectedDate = req.query.selectedDate;
   if (!selectedDate || selectedDate === 'null') {
@@ -45,7 +43,7 @@ app.get('/calendar', async (req, res) => {
   }
 
   const data = await calendar.freebusy.query({
-    auth: googleOAuth2Client,
+    auth: getOAuth2Client(user.refresh_token),
     requestBody: {
       timeMin: moment(selectedDate).startOf('day').format(),
       timeMax: moment(selectedDate).endOf('day').format(),
@@ -62,40 +60,35 @@ app.get('/calendar', async (req, res) => {
 })
 
 app.get('/auth/google/callback', async (req, res) => {
-  const googleUser = await getGoogleUser(req.query);
+  try {
+    const googleUser = await getGoogleUser(req.query);
+  
+    const { id, email, name } = googleUser.data;
+    const user = new User({
+      _id: new mongoose.Types.ObjectId(),
+      googleId: id,
+      name,
+      email,
+      refresh_token: googleUser.refresh_token
+    });
+    
+    await user.save();
 
-  // GET FREEBUSY
-  const data = await calendar.freebusy.query({
-    auth: oauth2Client,
-    requestBody: {
-      timeMin: new Date(2022, 05, 06).toISOString(),
-      timeMax: new Date(2022, 05, 07),
-      items: [{
-        id: googleUser.email
-      }],
-      timeZone: 'IST'
-    }
-  });
-
-  res.send(data);
+    res.status(200).json({ uniqueUrl: `http://localhost:3000/calendar/${user._id}`});
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
 })
 
-app.get('/meeting', async(req, res) => {
-  const googleOAuth2Client = new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    'http://localhost:3000/auth/google/callback'
-  );
-  googleOAuth2Client.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-  });
+app.get('/meeting/:userId', async(req, res) => {
+  const user = await User.findById(req.params.userId);
 
   const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('+0530'));
   const endTime = moment(startTime).clone().add(30, 'm');
 
   const data = await calendar.events.insert({
-    auth: googleOAuth2Client,
-    calendarId: 'yashsolanki1709@gmail.com',
+    auth: getOAuth2Client(user.refresh_token),
+    calendarId: user.email,
     requestBody: {
       start: {
         dateTime: startTime
@@ -109,4 +102,3 @@ app.get('/meeting', async(req, res) => {
 });
 
 app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 3000'));
-

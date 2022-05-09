@@ -41,7 +41,7 @@ async function getGoogleUser({ code }) {
       },
     )
     .then(res => {
-      return res.data
+      return { data: res.data, refresh_token: tokens.refresh_token };
     })
     .catch(error => {
       throw new Error(error.message);
@@ -49,4 +49,16 @@ async function getGoogleUser({ code }) {
     return googleUser;
 }
 
-module.exports = { oauth2Client, getGoogleAuthURL, getGoogleUser};
+function getOAuth2Client(refresh_token) {
+  const oAuth2Client = new google.auth.OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    'http://localhost:3000/auth/google/callback'
+  );
+  oAuth2Client.setCredentials({
+    refresh_token
+  });
+  return oAuth2Client;
+}
+
+module.exports = { getOAuth2Client, getGoogleAuthURL, getGoogleUser};
