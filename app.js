@@ -48,7 +48,7 @@ app.get('/calendar/:userId', async (req, res) => {
         items: [{
           id: calendarId
         }],
-        timeZone: 'IST'
+        timeZone: 'PST'
       }
     });
   
@@ -85,7 +85,7 @@ app.get('/meeting/:userId', async(req, res) => {
   try {
     const user = await User.findById(req.params.userId);
   
-    const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('+0530'));
+    const startTime = new Date(req.query.selectedInterval.slice(0, -5).concat('-0700'));
     const endTime = moment(startTime).clone().add(30, 'm');
   
     const data = await calendar.events.insert({

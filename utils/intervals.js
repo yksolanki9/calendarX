@@ -9,7 +9,7 @@ function getAllIntervals(date) {
   let intervalStartTime = selectedDate.clone().set({'h': 9, 'm': 0, 's': 0});
 
   //If selected date is same as today's date
-  if (selectedDate.startOf('day').isSame(moment().utcOffset("+05:30").startOf('day'))) {
+  if (selectedDate.startOf('day').isSame(moment().utcOffset("-07:00").startOf('day'))) {
     //And time is between 9 to 5, start interval from current time
     if ((moment().hour() > 9) && (moment().hour() < 17)) {
       intervalStartTime = moment().add(15 - moment().minute() % 15, 'm').subtract(moment().seconds(), 's');
