@@ -2,7 +2,7 @@ const express = require('express');
 const { google } = require('googleapis');
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { getOAuth2Client, getGoogleAuthURL, getGoogleUser } = require('./google-auth');
+const { getOAuth2Client, getGoogleAuthURL, getGoogleUser } = require('./config/google-auth');
 const { getFreeIntervals } = require('./utils/intervals');
 const User = require('./models/user.model');
 const Meeting = require('./models/meeting.model');
@@ -26,6 +26,26 @@ app.get("/", (req, res) => {
 app.get('/auth/google', (req, res) => {
   res.redirect(getGoogleAuthURL());
 });
+
+app.get('/auth/google/callback', async (req, res) => {
+  try {
+    const googleUser = await getGoogleUser(req.query);
+  
+    const { id, email, name } = googleUser.data;
+    const user = new User({
+      _id: new mongoose.Types.ObjectId(),
+      googleId: id,
+      name,
+      email,
+      refresh_token: googleUser.refresh_token
+    });
+    
+    await user.save();
+    res.render('auth', {url: `http://localhost:3000/calendar/${user._id}`});
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+})
 
 app.get('/calendar/:userId', async (req, res) => {
   try {
@@ -56,26 +76,6 @@ app.get('/calendar/:userId', async (req, res) => {
     const freeIntervals = getFreeIntervals(selectedDate, busyIntervals);
 
     res.render('calendar', {freeIntervals: freeIntervals, busyIntervals: busyIntervals, selectedDate: selectedDate});
-  } catch(err) {
-    res.status(500).json({ error: err.message });
-  }
-})
-
-app.get('/auth/google/callback', async (req, res) => {
-  try {
-    const googleUser = await getGoogleUser(req.query);
-  
-    const { id, email, name } = googleUser.data;
-    const user = new User({
-      _id: new mongoose.Types.ObjectId(),
-      googleId: id,
-      name,
-      email,
-      refresh_token: googleUser.refresh_token
-    });
-    
-    await user.save();
-    res.render('auth', {url: `http://localhost:3000/calendar/${user._id}`});
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
