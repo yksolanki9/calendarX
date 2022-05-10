@@ -54,6 +54,7 @@ app.get('/calendar/:userId', async (req, res) => {
   
     const busyIntervals = data.data.calendars[calendarId].busy;
     const freeIntervals = getFreeIntervals(selectedDate, busyIntervals);
+
     res.render('calendar', {freeIntervals: freeIntervals, busyIntervals: busyIntervals, selectedDate: selectedDate});
   } catch(err) {
     res.status(500).json({ error: err.message });
