@@ -7,6 +7,7 @@ const meetingSchema = mongoose.Schema({
   status: String,
   htmlLink: String,
   description: String,
+  summary: String,
   start: {
     dateTime: String,
     timeZone: String

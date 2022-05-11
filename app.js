@@ -32,15 +32,21 @@ app.get('/auth/google/callback', async (req, res) => {
     const googleUser = await getGoogleUser(req.query);
   
     const { id, email, name } = googleUser.data;
-    const user = new User({
-      _id: new mongoose.Types.ObjectId(),
-      googleId: id,
-      name,
-      email,
-      refresh_token: googleUser.refresh_token
-    });
-    
-    await user.save();
+
+    let user = await User.findOne({email});
+
+    if (!user) {
+      user = new User({
+        _id: new mongoose.Types.ObjectId(),
+        googleId: id,
+        name,
+        email,
+        refresh_token: googleUser.refresh_token
+      });
+      
+      await user.save();
+    }
+
     res.render('auth', {url: `http://localhost:3000/calendar/${user._id}`});
   } catch(err) {
     res.status(500).json({ error: err.message });
@@ -102,7 +108,8 @@ app.get('/meeting/:userId', async(req, res) => {
           email: 'mytestemail@gmail.com',
           displayName: 'Test Customer',
         }],
-        description: 'Test sales event'
+        description: 'Test sales event',
+        summary: 'Sales Meeting',
       }
     });
 
