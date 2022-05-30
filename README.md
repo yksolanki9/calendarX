@@ -14,14 +14,14 @@
     - Check the app summary and click `Save`
 - Generating Credentials
     - Again in `APIs and Services`, select `Credentials` -> `Create Credentials` -> `oAuth Client ID`
-    - Select `Application Type` (Web Application), add authorized origin (Use `http://localhost:3000` if you don't have a Domain) and a callback URL where Google will send the response after OAuth (`http://localhost:3000/auth/google/callback` in our case). Also add this as `CALLBACK_URL` in the `.env` file
+    - Select `Application Type` (Web Application), add authorized origin (Use `http://localhost:5000` if you don't have a Domain) and a callback URL where Google will send the response after OAuth (`http://localhost:5000/auth/google/callback` in our case). Also add this as `CALLBACK_URL` in the `.env` file
     - Save you client id and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the `.env` file
 
 ## Setup
 - Clone the github repo
 - Open terminal, go to the directory and run `npm i`
 - Make sure followed all the above steps and added all the variable as specified in the `.env.sample` inside the `.env` file
-- Run `npm run dev` which will start a Nodejs server at `localhost:3000`
+- Run `npm run dev` which will start a Nodejs server at `localhost:5000`
 
 ## About
 - On running the app in browser (`/` route), users will get an option to sign in with Google and to give app permission to read/write to their google calender.

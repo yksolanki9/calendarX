@@ -47,7 +47,7 @@ app.get('/auth/google/callback', async (req, res) => {
       await user.save();
     }
 
-    res.render('auth', {url: `http://localhost:3000/calendar/${user._id}`});
+    res.render('auth', {url: `http://localhost:5000/calendar/${user._id}`});
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
@@ -162,4 +162,4 @@ app.get('/admin/meetings', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 3000'));
+app.listen(PORT, () => console.log('SERVER RUNNING AT PORT 5000'));
