@@ -1,3 +1,11 @@
+## About
+- This app shows the free slots of an executive as per their google calendar so that clients can book meetings, and it has a dashboard for the admin to see all the meetings for an executive.
+- On running the app in browser (`/` route), users will get an option to sign in with Google and to give app permission to read/write to their google calender.
+- On signin, each user will get their custom calendar link `/calendar/:<user-id>` which can be shared with their clients
+- The client can select any date from the dropdown and see all the available meeting slots between 9 A.M. and 5 P.M. for that date. 
+- On selecting a slot, the client will be redirected to `/meeting/<user-id>?selectedDate=<date-string>`, where we show the success page and meeting details
+- Admins can go to `/admin/meetings` and select employee names from the dropdown to see all the scheduled meeting for that employee
+
 ## Prerequisites
 ### Setting up MongoDB Project
 - Create a new cluster in [MongoDB](https://www.mongodb.com/) to store user and meeting data. Copy the connection string and add the `MONGO_URI` to the `.env` file
@@ -22,13 +30,6 @@
 - Open terminal, go to the directory and run `npm i`
 - Make sure followed all the above steps and added all the variable as specified in the `.env.sample` inside the `.env` file
 - Run `npm run dev` which will start a Nodejs server at `localhost:5000`
-
-## About
-- On running the app in browser (`/` route), users will get an option to sign in with Google and to give app permission to read/write to their google calender.
-- On signin, each user will get their custom calendar link `/calendar/:<user-id>` which can be shared with their clients
-- The client can select any date from the dropdown and see all the available meeting slots between 9 A.M. and 5 P.M. for that date. 
-- On selecting a slot, the client will be redirected to `/meeting/<user-id>?selectedDate=<date-string>`, where we show the success page and meeting details
-- Admins can go to `/admin/meetings` and select employee names from the dropdown to see all the scheduled meeting for that employee
 
 ## Contact
 Please feel free to reach out to me at `yashsolanki1709@gmail.com` in case you have any queries.
