@@ -6,6 +6,16 @@
 - On selecting a slot, the client will be redirected to `/meeting/<user-id>?selectedDate=<date-string>`, where we show the success page and meeting details
 - Admins can go to `/admin/meetings` and select employee names from the dropdown to see all the scheduled meeting for that employee
 
+### UI Snapshots
+Admin View
+![Admin View](snapshots/admin-view.png)
+
+Client View
+![Client View](snapshots/client-view.png)
+
+Executive View
+![Executive View](snapshots/executive-view.png)
+
 ## Prerequisites
 ### Setting up MongoDB Project
 - Create a new cluster in [MongoDB](https://www.mongodb.com/) to store user and meeting data. Copy the connection string and add the `MONGO_URI` to the `.env` file
